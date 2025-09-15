@@ -1,0 +1,91 @@
+📅 Dia 1 – Definição e Planeamento
+
+Escopo Inicial:
+Apenas bilhetes para shows e eventos diversos
+
+Uso principal:
+Criar evento e gerar bilhetes digitais (organizador)
+Comprar/receber bilhete com QR Code (cliente)
+Validar bilhete na entrada (organizador/porteiro)
+
+Stacks:
+Frontend → React + Vite (rápido, moderno, fácil de transformar em PWA).
+Backend → Node.js + Express (leve e fácil de hospedar).
+Banco de dados → MySQL (Railway ou Supabase).
+Autenticação → JWT (login com email/senha).
+QR Codes → Biblioteca qrcode (gera QR) e jsQR (faz scan via câmera).
+CI/CD → GitHub Actions + Vercel (frontend) + Railway (backend)
+
+📅 Dia 2 – Identidade e Estrutura
+
+Compra o domínio: ex. passline.co.mz
+
+Cria logo simples no Canva.
+
+Define a estrutura da startup:
+
+Nome: Passline, LDA
+
+Missão: Simplificar bilhetes, convites e faturas digitais em Moçambique.
+
+Valores: Digital, simples, seguro.
+
+📅 Dia 3 – Protótipo
+
+Cria um design simples no Figma ou Canva com telas:
+
+Página inicial
+
+Login/registro
+
+Criar evento e gerar bilhetes
+
+Tela do bilhete com QR Code
+
+Tela de validação (scanner QR).
+
+Podes já montar um MVP no no-code (Bubble, Glide ou Adalo) se o objetivo é mostrar rápido.
+
+📅 Dia 4 – Desenvolvimento MVP
+
+Implementa o backend básico:
+
+Cadastro de usuário e login (JWT).
+
+Cadastro de evento.
+
+Geração de bilhete (com QR Code).
+
+Implementa o frontend básico:
+
+Criar evento e gerar QR Code.
+
+Página para validar o bilhete (scanner via câmera).
+
+📅 Dia 5 – Integração e Testes
+
+Testa:
+
+Criar evento → Gerar bilhete digital → Enviar por email/WhatsApp.
+
+Validar bilhete via scanner.
+
+Se fores usar pagamentos:
+
+Integra com M-Pesa ou E-Mola (podes simular no início).
+
+📅 Dia 6 – Lançamento Beta
+
+Coloca no Heroku, Vercel, ou Railway (já conheces o Railway).
+
+Cria página de apresentação simples: "Passline – Bilhetes e Convites Digitais em Moçambique".
+
+Prepara lista de primeiros clientes (bares, eventos, conferências).
+
+📅 Dia 7 – Divulgação
+
+Cria página no Facebook/Instagram.
+
+Apresenta o projeto a 2 ou 3 organizadores de eventos locais.
+
+Faz um teste real: cria um evento pequeno com bilhetes digitais Passline.
