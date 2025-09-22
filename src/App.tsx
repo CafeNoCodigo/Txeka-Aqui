@@ -1,10 +1,10 @@
-import AuthForm from './components/AuthForm';
+import InvoiceManager from './components/InvoiceManager';
 
 function App() {
 
   return (
     <>
-    <AuthForm />
+    <InvoiceManager />
     </>
   )
 }
