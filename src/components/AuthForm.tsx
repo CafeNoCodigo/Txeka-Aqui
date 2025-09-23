@@ -20,7 +20,13 @@ const AuthForm: React.FC = () => {
         await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Email ou senha incorretos.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('A sua senha deve ter pelo menos 6 caracteres.');
+      } else {
+        setError('Ocorreu um erro. Tente novamente.');
+      }
     }
   };
 

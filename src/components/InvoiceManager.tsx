@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { createInvoice, updateInvoice, deleteInvoice, getInvoices } from '../services/invoiceService';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+import { useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
 
 const InvoiceManager: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -11,6 +15,7 @@ const InvoiceManager: React.FC = () => {
     quantity: 0,
     paymentMethod: '',
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -18,6 +23,16 @@ const InvoiceManager: React.FC = () => {
       setInvoices(data);
     };
     fetchInvoices();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate('/login');
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -38,6 +53,14 @@ const InvoiceManager: React.FC = () => {
   const handleDelete = async (id: string) => {
     await deleteInvoice(id);
     setInvoices(invoices.filter(inv => inv.id !== id));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Erro ao deslogar:', error);
+    }
   };
 
   return (
@@ -66,6 +89,7 @@ const InvoiceManager: React.FC = () => {
           </li>
         ))}
       </ul>
+      <button onClick={handleLogout}>Sair</button>
     </div>
   );
 };
