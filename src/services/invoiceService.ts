@@ -1,11 +1,15 @@
-import { db } from '../firebaseConfig';
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { db, auth } from '../firebaseConfig';
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 
 const invoiceCollection = collection(db, 'invoices');
 
 export const createInvoice = async (invoiceData: any) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Usuário não autenticado');
+
+  const invoiceWithUser = { ...invoiceData, userId: user.uid };
   try {
-    const docRef = await addDoc(invoiceCollection, invoiceData);
+    const docRef = await addDoc(invoiceCollection, invoiceWithUser);
     return docRef.id;
   } catch (error) {
     console.error('Erro ao criar a factura:', error);
@@ -34,8 +38,13 @@ export const deleteInvoice = async (id: string) => {
 };
 
 export const getInvoices = async () => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Usuário não autenticado');
+
   try {
-    const querySnapshot = await getDocs(invoiceCollection);
+    const querySnapshot = await getDocs(
+      query(invoiceCollection, where('userId', '==', user.uid))
+    );
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('Erro ao buscar a factura:', error);
