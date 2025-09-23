@@ -51,9 +51,9 @@ const InvoiceManager: React.FC = () => {
         <input name="quantity" type="number" placeholder="Quantidade" onChange={handleInputChange} />
         <select name="paymentMethod" onChange={handleInputChange}>
           <option value="">Forma de Pagamento</option>
-          <option value="Cartão">Cartão</option>
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Pix">Pix</option>
+          <option value="M-Pesa">M-Pesa</option>
+          <option value="E-Mola">E-Mola</option>
+          <option value="Banco">Banco</option>
         </select>
         <button onClick={handleCreate}>Criar Fatura</button>
       </div>
