@@ -15,6 +15,8 @@ const InvoiceManager: React.FC = () => {
     quantity: 0,
     paymentMethod: '',
   });
+  const [logo, setLogo] = useState<File | null>(null);
+  const [previewData, setPreviewData] = useState<any | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,6 +40,19 @@ const InvoiceManager: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setLogo(e.target.files[0]);
+    }
+  };
+
+  const handlePreview = () => {
+    setPreviewData({
+      ...formData,
+      logo: logo ? URL.createObjectURL(logo) : null,
+    });
   };
 
   const handleCreate = async () => {
@@ -78,7 +93,37 @@ const InvoiceManager: React.FC = () => {
           <option value="E-Mola">E-Mola</option>
           <option value="Banco">Banco</option>
         </select>
+        <input type="file" accept="image/*" onChange={handleLogoUpload} />
         <button onClick={handleCreate}>Criar Fatura</button>
+        <button
+          onClick={() => {
+            setFormData({
+              companyName: '',
+              employeeName: '',
+              employeeRole: '',
+              product: '',
+              quantity: 0,
+              paymentMethod: '',
+            });
+            setLogo(null);
+            setPreviewData(null);
+            // Limpar os campos do formulário visualmente
+            const inputs = document.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+              'input[name="companyName"], input[name="employeeName"], input[name="employeeRole"], input[name="product"], input[name="quantity"], select[name="paymentMethod"], input[type="file"]'
+            );
+            inputs.forEach(input => {
+              if (input.type === 'file') {
+          input.value = '';
+              } else if (input.tagName === 'SELECT') {
+          (input as HTMLSelectElement).selectedIndex = 0;
+              } else {
+          input.value = '';
+              }
+            });
+          }}
+        >
+          Limpar Campos
+        </button>
       </div>
       <ul>
         {invoices.map(invoice => (
@@ -86,9 +131,19 @@ const InvoiceManager: React.FC = () => {
             {invoice.companyName} - {invoice.product} - {invoice.quantity}
             <button onClick={() => handleUpdate(invoice.id)}>Editar</button>
             <button onClick={() => handleDelete(invoice.id)}>Excluir</button>
+            <button onClick={() => setPreviewData(invoice)}>Pré-visualizar</button>
           </li>
         ))}
       </ul>
+      {previewData && (
+        <div className="invoice-preview">
+          {previewData.logo && <img src={previewData.logo} alt="Logotipo da Empresa" style={{ maxWidth: '100px' }} />}
+          <h2>{previewData.companyName}</h2>
+          <p>Funcionário: {previewData.employeeName} - {previewData.employeeRole}</p>
+          <p>Produto: {previewData.product} - Quantidade: {previewData.quantity}</p>
+          <p>Forma de Pagamento: {previewData.paymentMethod}</p>
+        </div>
+      )}
       <button onClick={handleLogout}>Sair</button>
     </div>
   );
