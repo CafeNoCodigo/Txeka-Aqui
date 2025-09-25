@@ -105,7 +105,7 @@ const AuthForm: React.FC = () => {
   return (
     <div className="auth-form-container">
       <form onSubmit={handleSubmit} className="auth-form">
-        <h2>{isRegistering ? 'Registrar' : 'Entrar'}</h2>
+        <h2 className='invoice-header'>{isRegistering ? 'Registrar' : 'Entrar'}</h2>
         {error && <p className="error-message">{error}</p>}
         <input
           type="text"
@@ -137,7 +137,7 @@ const AuthForm: React.FC = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            <button type="button" onClick={handleSendVerificationCode}>
+            <button className='invoice-button' type="button" onClick={handleSendVerificationCode}>
               Enviar Código de Verificação
             </button>
             <input
@@ -149,7 +149,7 @@ const AuthForm: React.FC = () => {
             />
           </>
         )}
-        <button type="submit">{isRegistering ? 'Registrar' : 'Entrar'}</button>
+        <button className='invoice-button' type="submit">{isRegistering ? 'Registrar' : 'Entrar'}</button>
         <p onClick={() => setIsRegistering(!isRegistering)} className="toggle-form">
           {isRegistering ? 'Já tem uma conta? Entre aqui.' : 'Não tem uma conta? Registre-se aqui.'}
         </p>
