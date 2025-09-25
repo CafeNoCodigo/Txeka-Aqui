@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { auth } from '../firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import './AuthForm.css';
+
+const firestore = getFirestore();
 
 const AuthForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +14,7 @@ const AuthForm: React.FC = () => {
   const [generatedCode, setGeneratedCode] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
+  const [companyName, setCompanyName] = useState('');
 
   const handleSendVerificationCode = async () => {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -51,9 +55,41 @@ const AuthForm: React.FC = () => {
           setError('Código de verificação incorreto.');
           return;
         }
+        if (!companyName) {
+          setError('O nome da empresa é obrigatório.');
+          return;
+        }
+        
         await createUserWithEmailAndPassword(auth, email, password);
+        
+        const user = auth.currentUser;
+        if (user) {
+          const userRef = doc(firestore, 'users', user.uid);
+          await setDoc(userRef, {
+            companyName,
+            email,
+          });
+        }
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        
+        const isEmail = email.includes('@');
+        if (isEmail) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          
+          const usersRef = collection(firestore, 'users');
+          const q = query(usersRef, where('companyName', '==', email));
+          const querySnapshot = await getDocs(q);
+
+          if (querySnapshot.empty) {
+            setError('Nome da empresa não encontrado.');
+            return;
+          }
+
+          const userDoc = querySnapshot.docs[0];
+          const userEmail = userDoc.data().email;
+          await signInWithEmailAndPassword(auth, userEmail, password);
+        }
       }
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
@@ -72,8 +108,8 @@ const AuthForm: React.FC = () => {
         <h2>{isRegistering ? 'Registrar' : 'Entrar'}</h2>
         {error && <p className="error-message">{error}</p>}
         <input
-          type="email"
-          placeholder="Email"
+          type="text"
+          placeholder={isRegistering ? "Email" : "Email ou Nome da Empresa"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -87,6 +123,13 @@ const AuthForm: React.FC = () => {
         />
         {isRegistering && (
           <>
+            <input
+              type="text"
+              placeholder="Nome da Empresa"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              required
+            />
             <input
               type="password"
               placeholder="Repetir Senha"
