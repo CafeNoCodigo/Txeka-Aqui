@@ -20,6 +20,8 @@ const InvoiceManager: React.FC = () => {
   const [taxRate, setTaxRate] = useState(0.17); // 17% tax rate
   const navigate = useNavigate();
 
+  const isPaid = true;
+
   useEffect(() => {
     const fetchInvoices = async () => {
       const data = await getInvoices();
@@ -144,19 +146,19 @@ const InvoiceManager: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Gerenciar Faturas</h1>
-      <div>
-        <input name="employeeName" placeholder="Nome do Funcionário" onChange={handleInputChange} />
-        <input name="employeeRole" placeholder="Cargo" onChange={handleInputChange} />
+    <div className="invoice-container">
+      <h1 className="invoice-header">Gerenciar Faturas</h1>
+      <div className="invoice-section">
+        <input className="invoice-input mb-4" name="employeeName" placeholder="Nome do Cliente" onChange={handleInputChange} />
+        <input className="invoice-input md:ml-4" name="employeeRole" placeholder="Nome do atendente" onChange={handleInputChange} />
         <select name="paymentMethod" onChange={handleInputChange}>
           <option value="">Forma de Pagamento</option>
           <option value="M-Pesa">M-Pesa</option>
           <option value="E-Mola">E-Mola</option>
           <option value="Banco">Banco</option>
         </select>
-        <button onClick={handleCreate}>Criar Fatura</button>
         <button
+          className='invoice-button mt-4 md:ml-4'
           onClick={() => {
             setFormData({
               companyName: '',
@@ -184,54 +186,76 @@ const InvoiceManager: React.FC = () => {
           Limpar Campos
         </button>
       </div>
-      <div>
-        <h3>Produtos</h3>
-        {Array.isArray(products) ? (
-          products.length > 0 ? (
-            products.map((product, index) => (
-              <div key={index}>
-                <input
-                  type="text"
-                  placeholder="Nome do Produto"
-                  value={product.name || ''}
-                  onChange={(e) => handleProductChange(index, 'name', e.target.value)}
-                />
-                <input
-                  type="number"
-                  placeholder="Quantidade"
-                  value={product.quantity || 0}
-                  onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value) || 0)}
-                />
-                <input
-                  type="number"
-                  placeholder="Preço"
-                  value={product.price || 0}
-                  onChange={(e) => handleProductChange(index, 'price', parseFloat(e.target.value) || 0)}
-                />
-                <button onClick={() => handleRemoveProduct(index)}>Remover</button>
-              </div>
-            ))
-          ) : (
-            <p>Nenhum produto adicionado ainda.</p>
-          )
-        ) : (
-          <p>Erro: `products` não é um array válido.</p>
-        )}
-        <button onClick={handleAddProduct}>Adicionar Produto</button>
+      <div className="invoice-section">
+        <h3 className="invoice-section-title">Adicionar Produtos</h3>
+        {products.map((product, index) => (
+          <div key={index} className="flex flex-col sm:flex-row sm:items-center space-x-4 mb-4 sm:flex-wrap">
+            <input
+              type="text"
+              placeholder="Nome do Produto"
+              value={product.name || ''}
+              onChange={(e) => handleProductChange(index, 'name', e.target.value)}
+              className="invoice-input flex-1 mb-4"
+            />
+            <input
+              type="number"
+              placeholder="Quantidade"
+              value={product.quantity || 0}
+              onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value) || 0)}
+              className="invoice-input w-24 mb-4"
+            />
+            <input
+              type="number"
+              placeholder="Preço"
+              value={product.price || 0}
+              onChange={(e) => handleProductChange(index, 'price', parseFloat(e.target.value) || 0)}
+              className="invoice-input w-24 mb-4"
+            />
+            <button
+              onClick={() => handleRemoveProduct(index)}
+              className="invoice-button-remove"
+            >
+              Remover
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={handleAddProduct}
+          className="invoice-button"
+        >
+          Adicionar Produto
+        </button>
       </div>
-      <div>
-        <h3>Resumo</h3>
-        <p>Subtotal: {calculateSubtotal()} MZN</p>
-        <p>Impostos (17%): {calculateTax(calculateSubtotal())} MZN</p>
-        <p>Total: {calculateTotal(calculateSubtotal(), calculateTax(calculateSubtotal()))} MZN</p>
+
+      <div className="invoice-section">
+        <h3 className="invoice-section-title">Resumo</h3>
+        <p className="invoice-summary">Subtotal: <span className="invoice-summary-bold">{calculateSubtotal()} MZN</span></p>
+        <p className="invoice-summary">Impostos (17%): <span className="invoice-summary-bold">{calculateTax(calculateSubtotal())} MZN</span></p>
+        <p className="invoice-summary">Total: <span className="invoice-summary-bold">{calculateTotal(calculateSubtotal(), calculateTax(calculateSubtotal()))} MZN</span></p>
       </div>
+
+      <div className="invoice-section">
+        <h3 className="invoice-section-title">Ações</h3>
+        <button
+          onClick={handleCreate}
+          className="invoice-button mr-4"
+        >
+          Criar Fatura
+        </button>
+        <button
+          onClick={handleLogout}
+          className=" text-white px-4 py-2 rounded-lg cursor-pointer md:hover:scale-105 transition-transform bg-red-500 hover:bg-red-600"
+        >
+          Sair
+        </button>
+      </div>
+
       <ul>
         {invoices.map(invoice => (
-          <li key={invoice.id}>
-            {invoice.companyName} - {invoice.products.map((p: any) => p.name).join(', ')} - {invoice.subtotal} - {invoice.tax} - {invoice.total} - {invoice.price + 'MZN'}
-            <button onClick={() => handleUpdate(invoice.id)}>Editar</button>
-            <button onClick={() => handleDelete(invoice.id)}>Excluir</button>
-            <button onClick={() => setPreviewData(invoice)}>Pré-visualizar</button>
+          <li className="invoice-summary mb-4" key={invoice.id}>
+            {isPaid ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name)} - {invoice.total}
+            <button className="invoice-button ml-4 mr-4" onClick={() => handleDelete(invoice.id)}>Excluir</button>
+            <button className="invoice-button" onClick={() => setPreviewData(invoice)}>Ver</button>
           </li>
         ))}
       </ul>
@@ -239,13 +263,14 @@ const InvoiceManager: React.FC = () => {
         <div className="invoice-preview">
           {previewData.logo && <img src={previewData.logo} alt="Logotipo da Empresa" style={{ maxWidth: '100px' }} />}
           <h2>{previewData.companyName}</h2>
-          <p>Nome do Funcionário: {previewData.employeeName}</p>
-          <p>Cargo: {previewData.employeeRole}</p>
+          <p>Nome do Cliente: {previewData.employeeName}</p>
+          <p>Nome do Atendente: {previewData.employeeRole}</p>
           <p>Produtos:</p>
           <ul>
             {previewData.products.map((product: any, index: number) => (
               <li key={index}>
-                {product.name} - {product.quantity} - {product.price}
+                <p>{"🧷 " + product.name}</p> 
+                <p>Quantidade: {product.quantity} - {product.price + "MZN"}</p> 
               </li>
             ))}
           </ul>
@@ -255,7 +280,6 @@ const InvoiceManager: React.FC = () => {
           <p>Forma de Pagamento: {previewData.paymentMethod}</p>
         </div>
       )}
-      <button onClick={handleLogout}>Sair</button>
     </div>
   );
 };
