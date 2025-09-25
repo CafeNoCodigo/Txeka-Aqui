@@ -8,7 +8,7 @@
   @apply text-3xl font-bold text-center text-[#2e7d32] mb-6;
 }
 .invoice-section {
-  @apply bg-white shadow-md rounded-lg p-6 mb-6;
+  @apply bg-amber-50 shadow-md rounded-lg p-6 mb-6;
 }
 .invoice-section-title {
   @apply text-xl font-semibold mb-4;

@@ -105,6 +105,34 @@ const InvoiceManager: React.FC = () => {
     return subtotal + tax;
   };
 
+  const clearForm = () => {
+    setFormData({
+      companyName: '',
+      employeeName: '',
+      employeeRole: '',
+      paymentMethod: '',
+    });
+    setPreviewData(null);
+    setProducts([]);
+
+    // Limpar os campos do formulário visualmente
+    const inputs = document.querySelectorAll<
+      HTMLInputElement | HTMLSelectElement
+    >(
+      'input[name="companyName"], input[name="employeeName"], input[name="employeeRole"], select[name="paymentMethod"], input[type="file"]'
+    );
+    inputs.forEach(input => {
+      if (input.type === 'file') {
+        input.value = '';
+      } else if (input.tagName === 'SELECT') {
+        (input as HTMLSelectElement).selectedIndex = 0;
+      } else {
+        input.value = '';
+      }
+    });
+  };
+
+
   const handleCreate = async () => {
     if (products.length === 0) {
       alert('Adicione pelo menos um produto antes de criar a fatura.');
@@ -151,11 +179,12 @@ const InvoiceManager: React.FC = () => {
       <div className="invoice-section">
         <input className="invoice-input mb-4" name="employeeName" placeholder="Nome do Cliente" onChange={handleInputChange} />
         <input className="invoice-input md:ml-4" name="employeeRole" placeholder="Nome do atendente" onChange={handleInputChange} />
-        <select name="paymentMethod" onChange={handleInputChange}>
+        <select className='border border-gray-300 md:ml-4 mt-4 p-2 rounded-lg' name="paymentMethod" onChange={handleInputChange}>
           <option value="">Forma de Pagamento</option>
           <option value="M-Pesa">M-Pesa</option>
           <option value="E-Mola">E-Mola</option>
           <option value="Banco">Banco</option>
+          <option value="Banco">Numerário</option>
         </select>
         <button
           className='invoice-button mt-4 md:ml-4'
@@ -237,7 +266,10 @@ const InvoiceManager: React.FC = () => {
       <div className="invoice-section">
         <h3 className="invoice-section-title">Ações</h3>
         <button
-          onClick={handleCreate}
+          onClick={() => {
+            handleCreate();
+            clearForm();
+          }}
           className="invoice-button mr-4"
         >
           Criar Fatura
@@ -253,7 +285,7 @@ const InvoiceManager: React.FC = () => {
       <ul>
         {invoices.map(invoice => (
           <li className="invoice-summary mb-4" key={invoice.id}>
-            {isPaid ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name)} - {invoice.total}
+            {isPaid ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name).join(', ')} - {invoice.total}
             <button className="invoice-button ml-4 mr-4" onClick={() => handleDelete(invoice.id)}>Excluir</button>
             <button className="invoice-button" onClick={() => setPreviewData(invoice)}>Ver</button>
           </li>
@@ -270,13 +302,13 @@ const InvoiceManager: React.FC = () => {
             {previewData.products.map((product: any, index: number) => (
               <li key={index}>
                 <p>{"🧷 " + product.name}</p> 
-                <p>Quantidade: {product.quantity} - {product.price + "MZN"}</p> 
+                <p>Quantidade: {product.quantity}</p> 
               </li>
             ))}
           </ul>
-          <p>Subtotal: {previewData.subtotal}</p>
-          <p>Imposto: {previewData.tax}</p>
-          <p>Total: {previewData.total}</p>
+          <p>Subtotal: {previewData.subtotal + "MZN"}</p>
+          <p>Imposto: {previewData.tax + "MZN"}</p>
+          <p>Total: {previewData.total + "MZN"}</p>
           <p>Forma de Pagamento: {previewData.paymentMethod}</p>
         </div>
       )}
