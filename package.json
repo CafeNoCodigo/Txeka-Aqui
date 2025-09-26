@@ -16,6 +16,7 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "firebase": "^12.3.0",
+    "jspdf": "^3.0.3",
     "nodemailer": "^7.0.6",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",

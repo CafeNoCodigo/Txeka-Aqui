@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { createInvoice, updateInvoice, deleteInvoice, getInvoices } from '../services/invoiceService';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../firebaseConfig';
+import { auth, db, storage } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { QRCodeCanvas } from 'qrcode.react';
+import jsPDF from "jspdf";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const InvoiceManager: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -22,7 +24,41 @@ const InvoiceManager: React.FC = () => {
   const navigate = useNavigate();
   const [qrCodeData, setQrCode] = useState<any | null>(null);
 
-  const isPaid = true;
+  const generateInvoicePDF = (invoice: any) => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text(`Código da Factura: ${invoice.id}`, 20, 20);
+
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${invoice.employeeName}`, 20, 40);
+    doc.text(`Atendente: ${invoice.employeeRole}`, 20, 50);
+    doc.text(`Forma de Pagamento: ${invoice.paymentMethod}`, 20, 60);
+
+    let y = 80;
+    invoice.products.forEach((p: any, i: number) => {
+      doc.text(`${i + 1}. ${p.name} - Qtd: ${p.quantity} - Preço: ${p.price} MZN`, 20, y);
+      y += 10;
+    });
+
+    doc.text(`Subtotal: ${invoice.subtotal} MZN`, 20, y + 10);
+    doc.text(`Impostos: ${invoice.tax} MZN`, 20, y + 20);
+    doc.text(`Total: ${invoice.total} MZN`, 20, y + 30);
+
+    // Baixa o PDF localmente
+    //doc.save(`Fatura-${invoice.employeeName}.pdf`);
+    return doc.output("blob");
+  };
+
+  const uploadInvoicePDF = async (invoice: any, pdfBlob: Blob) => {
+    const pdfRef = ref(storage, `faturas/${invoice.id}.pdf`);
+    await uploadBytes(pdfRef, pdfBlob);
+    const url = await getDownloadURL(pdfRef);
+    return url; // retorna link público do PDF
+  };
+
+
+  var isPaid = false;
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -152,9 +188,29 @@ const InvoiceManager: React.FC = () => {
       total,
     };
 
+    // 1. Cria a fatura no Firestore (guarda sem PDF primeiro)
     const id = await createInvoice(invoiceData);
-    setInvoices([...invoices, { id, ...invoiceData }]);
+
+    // 2. Gera PDF local
+    const pdfBlob = generateInvoicePDF({ id, ...invoiceData });
+
+    // 3. Faz upload do PDF para o Storage
+    const pdfRef = ref(storage, `faturas/${id}.pdf`);
+    await uploadBytes(pdfRef, pdfBlob);
+
+    // 4. Obtém URL pública do PDF
+    const pdfUrl = await getDownloadURL(pdfRef);
+
+    // 5. Atualiza documento da fatura no Firestore com o pdfUrl
+    await updateInvoice(id, { pdfUrl });  // <- 🔑 salva o link no documento
+
+    // 6. Atualiza estado local
+    const invoiceWithPdf = { id, ...invoiceData, pdfUrl };
+    setInvoices([...invoices, invoiceWithPdf]);
+
+    clearForm();
   };
+
 
   const handleUpdate = async (id: string) => {
     await updateInvoice(id, formData);
@@ -289,23 +345,23 @@ const InvoiceManager: React.FC = () => {
             {isPaid ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name).join(', ')} - {invoice.total + "MZN"}
             <button className="invoice-button ml-2 lg:mr-2" onClick={() => handleDelete(invoice.id)}>Excluir</button>
             <button className="invoice-button hidden lg:inline-block" onClick={() => { setPreviewData(invoice); setQrCode(invoice)}}>Ver</button>
-            <button className="invoice-button ml-2" onClick={() => setPreviewData(invoice)}>Pago</button>
+            <button className="invoice-button ml-2" onClick={() => {isPaid = true}}>Pago</button>
+            <button className="invoice-button ml-2" onClick={() => window.open(invoice.pdfUrl, "_blank")}>PDF</button>
           </li>
+          
         ))}
       </ul>
       {previewData && (
         <div className="invoice-preview">
-          {qrCodeData && (
+          {qrCodeData && qrCodeData.pdfUrl &&(
             <div>
               <h3>#{qrCodeData.id}</h3>
               <QRCodeCanvas
-                value={JSON.stringify({
-                  id: qrCodeData.id,
-                  cliente: qrCodeData.employeeName,
-                  total: qrCodeData.total,
-                })}
+                value={qrCodeData.pdfUrl}  // 👈 link do PDF armazenado no Firebase
                 size={180}
+                fgColor="#000"
               />
+              <p className="mt-2">Escaneie para baixar a fatura</p>
             </div>
           )}
           <h2>{previewData.companyName}</h2>
