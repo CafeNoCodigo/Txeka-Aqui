@@ -5,6 +5,7 @@ import { auth, db } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const InvoiceManager: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -19,6 +20,7 @@ const InvoiceManager: React.FC = () => {
   const [products, setProducts] = useState<{ name: string; quantity: number; price: number }[]>([]);
   const [taxRate, setTaxRate] = useState(0.17); // 17% tax rate
   const navigate = useNavigate();
+  const [qrCodeData, setQrCode] = useState<any | null>(null);
 
   const isPaid = true;
 
@@ -131,7 +133,6 @@ const InvoiceManager: React.FC = () => {
       }
     });
   };
-
 
   const handleCreate = async () => {
     if (products.length === 0) {
@@ -285,15 +286,28 @@ const InvoiceManager: React.FC = () => {
       <ul>
         {invoices.map(invoice => (
           <li className="invoice-summary mb-4" key={invoice.id}>
-            {isPaid ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name).join(', ')} - {invoice.total}
-            <button className="invoice-button ml-4 mr-4" onClick={() => handleDelete(invoice.id)}>Excluir</button>
-            <button className="invoice-button" onClick={() => setPreviewData(invoice)}>Ver</button>
+            {isPaid ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name).join(', ')} - {invoice.total + "MZN"}
+            <button className="invoice-button ml-2 lg:mr-2" onClick={() => handleDelete(invoice.id)}>Excluir</button>
+            <button className="invoice-button hidden lg:inline-block" onClick={() => { setPreviewData(invoice); setQrCode(invoice)}}>Ver</button>
+            <button className="invoice-button ml-2" onClick={() => setPreviewData(invoice)}>Pago</button>
           </li>
         ))}
       </ul>
       {previewData && (
         <div className="invoice-preview">
-          {previewData.logo && <img src={previewData.logo} alt="Logotipo da Empresa" style={{ maxWidth: '100px' }} />}
+          {qrCodeData && (
+            <div>
+              <h3>#{qrCodeData.id}</h3>
+              <QRCodeCanvas
+                value={JSON.stringify({
+                  id: qrCodeData.id,
+                  cliente: qrCodeData.employeeName,
+                  total: qrCodeData.total,
+                })}
+                size={180}
+              />
+            </div>
+          )}
           <h2>{previewData.companyName}</h2>
           <p>Nome do Cliente: {previewData.employeeName}</p>
           <p>Nome do Atendente: {previewData.employeeRole}</p>
