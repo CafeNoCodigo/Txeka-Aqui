@@ -4,7 +4,7 @@ const footer = () => {
         <footer className='relative w-full h-30 bg-white'>
             <div className='flex flex-col items-center justify-center h-full text-white gap-1'>
             <p className='text-sm text-black'>© {2025} InvoiceUp System. All rights reserved.</p>
-            <p className='text-xs text-black'>Made with 💚 by FPS Software Solutions</p>
+            <p className='text-xs text-black'>Made with 💚 by Fabião Chirindza Mainato</p>
             </div>
         </footer>
     </div>

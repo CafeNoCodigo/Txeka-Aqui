@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { auth } from '../firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
 import './AuthForm.css';
+
+const Loader = lazy(() => import("../components/Loader"));
 
 const firestore = getFirestore();
 
@@ -15,17 +18,26 @@ const AuthForm: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+
+  useEffect(() => {
+    // Simula carregamento inicial
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSendVerificationCode = async () => {
+    if (isSendingCode) return;
+    setIsSendingCode(true);
+
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedCode(code);
 
     try {
       const response = await fetch('http://localhost:3001/send-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code }),
       });
 
@@ -38,6 +50,9 @@ const AuthForm: React.FC = () => {
     } catch (error) {
       console.error('Erro ao enviar e-mail de verificação:', error);
       setError('Erro ao enviar e-mail de verificação. Tente novamente.');
+    } finally {
+      // 30s de cooldown
+      setTimeout(() => setIsSendingCode(false), 30000);
     }
   };
 
@@ -59,9 +74,9 @@ const AuthForm: React.FC = () => {
           setError('O nome da empresa é obrigatório.');
           return;
         }
-        
+
         await createUserWithEmailAndPassword(auth, email, password);
-        
+
         const user = auth.currentUser;
         if (user) {
           const userRef = doc(firestore, 'users', user.uid);
@@ -71,12 +86,10 @@ const AuthForm: React.FC = () => {
           });
         }
       } else {
-        
         const isEmail = email.includes('@');
         if (isEmail) {
           await signInWithEmailAndPassword(auth, email, password);
         } else {
-          
           const usersRef = collection(firestore, 'users');
           const q = query(usersRef, where('companyName', '==', email));
           const querySnapshot = await getDocs(q);
@@ -92,6 +105,7 @@ const AuthForm: React.FC = () => {
         }
       }
     } catch (err: any) {
+      console.error("Erro Firebase:", err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         setError('Email ou senha incorretos.');
       } else if (err.code === 'auth/weak-password') {
@@ -102,58 +116,90 @@ const AuthForm: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-100">
+        <Suspense fallback={<div></div>}>
+          <Loader text="Carregando suas faturas..." size={80} />
+        </Suspense>
+      </div>
+    );
+  }
+
   return (
     <div className="auth-form-container">
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h2 className='invoice-header'>{isRegistering ? 'Registrar' : 'Entrar'}</h2>
-        {error && <p className="error-message">{error}</p>}
-        <input
-          type="text"
-          placeholder={isRegistering ? "Email" : "Email ou Nome da Empresa"}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        {isRegistering && (
-          <>
-            <input
-              type="text"
-              placeholder="Nome da Empresa"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Repetir Senha"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-            <button className='invoice-button' type="button" onClick={handleSendVerificationCode}>
-              Enviar Código de Verificação
-            </button>
-            <input
-              type="text"
-              placeholder="Código de Verificação"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-              required
-            />
-          </>
-        )}
-        <button className='invoice-button' type="submit">{isRegistering ? 'Registrar' : 'Entrar'}</button>
-        <p onClick={() => setIsRegistering(!isRegistering)} className="toggle-form">
-          {isRegistering ? 'Já tem uma conta? Entre aqui.' : 'Não tem uma conta? Registre-se aqui.'}
-        </p>
-      </form>
+      <AnimatePresence mode="wait">
+        <motion.form
+          key={isRegistering ? "register" : "login"}
+          onSubmit={handleSubmit}
+          className="auth-form"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          <h2 className='invoice-header'>{isRegistering ? 'Registrar' : 'Entrar'}</h2>
+          {error && <p className="error-message">{error}</p>}
+
+          <input
+            type="text"
+            placeholder={isRegistering ? "Email" : "Email ou Nome da Empresa"}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          {isRegistering && (
+            <>
+              <input
+                type="text"
+                placeholder="Nome da Empresa"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Repetir Senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button
+                className='invoice-button'
+                type="button"
+                onClick={handleSendVerificationCode}
+                disabled={isSendingCode}
+              >
+                {isSendingCode ? 'Aguarde...' : 'Enviar Código de Verificação'}
+              </button>
+              <input
+                type="text"
+                placeholder="Código de Verificação"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                required
+              />
+            </>
+          )}
+
+          <button className='invoice-button' type="submit">
+            {isRegistering ? 'Registrar' : 'Entrar'}
+          </button>
+
+          <p onClick={() => setIsRegistering(!isRegistering)} className="toggle-form">
+            {isRegistering ? 'Já tem uma conta? Entre aqui.' : 'Não tem uma conta? Registre-se aqui.'}
+          </p>
+        </motion.form>
+      </AnimatePresence>
     </div>
   );
 };

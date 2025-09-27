@@ -1,29 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { createInvoice, updateInvoice, deleteInvoice, getInvoices } from '../services/invoiceService';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db, storage } from '../firebaseConfig';
-import { useNavigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { QRCodeCanvas } from 'qrcode.react';
+import React, { useEffect, useState, Suspense, lazy } from "react";
+import { createInvoice, updateInvoice, deleteInvoice, getInvoices } from "../services/invoiceService";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth, db, storage } from "../firebaseConfig";
+import { useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { QRCodeCanvas } from "qrcode.react";
 import jsPDF from "jspdf";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+const Loader = lazy(() => import("../components/Loader"));
 
 const InvoiceManager: React.FC = () => {
+  
   const [invoices, setInvoices] = useState<any[]>([]);
   const [formData, setFormData] = useState({
-    companyName: '',
-    employeeName: '',
-    employeeRole: '',
-    paymentMethod: '',
+    companyName: "",
+    employeeName: "",
+    employeeRole: "",
+    paymentMethod: "",
   });
   const [logo, setLogo] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any | null>(null);
   const [products, setProducts] = useState<{ name: string; quantity: number; price: number }[]>([]);
-  const [taxRate, setTaxRate] = useState(0.17); // 17% tax rate
-  const navigate = useNavigate();
   const [qrCodeData, setQrCode] = useState<any | null>(null);
   const [paidInvoices, setPaidInvoices] = useState<{ [key: string]: boolean }>({});
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const generateInvoicePDF = (invoice: any) => {
     const doc = new jsPDF();
@@ -51,7 +52,6 @@ const InvoiceManager: React.FC = () => {
   };
 
   const generateQRCode = (invoice: any) => {
-    // Podes escolher os dados que queres no QR: por ex. JSON ou texto
     const qrData = JSON.stringify({
       id: invoice.id,
       cliente: invoice.employeeName,
@@ -67,46 +67,6 @@ const InvoiceManager: React.FC = () => {
     const url = await getDownloadURL(pdfRef);
     return url; // retorna link público do PDF
   };
-
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      const data = await getInvoices();
-      setInvoices(data);
-
-      const paidState: { [key: string]: boolean } = {};
-      data.forEach((inv: any) => {
-        paidState[inv.id] = inv.isPaid || false;
-      });
-      setPaidInvoices(paidState);
-    };
-    fetchInvoices();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        navigate('/login');
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const fetchCompanyName = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          const companyName = userDoc.data().companyName;
-          setFormData((prevData) => ({ ...prevData, companyName }));
-        }
-      }
-    };
-
-    fetchCompanyName();
-  }, []);
 
   // logs para depuração
   //useEffect(() => {
@@ -149,12 +109,8 @@ const InvoiceManager: React.FC = () => {
     return products.reduce((sum, product) => sum + product.price * product.quantity, 0);
   };
 
-  const calculateTax = (subtotal: number) => {
-    return subtotal * taxRate;
-  };
-
-  const calculateTotal = (subtotal: number, tax: number) => {
-    return subtotal + tax;
+  const calculateTotal = (subtotal: number) => {
+    return subtotal;
   };
 
   const clearForm = () => {
@@ -191,14 +147,12 @@ const InvoiceManager: React.FC = () => {
     }
 
     const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
-    const total = calculateTotal(subtotal, tax);
+    const total = calculateTotal(subtotal);
 
     const invoiceData = {
       ...formData,
       products,
       subtotal,
-      tax,
       total,
       isPaid: false,
     };
@@ -208,7 +162,6 @@ const InvoiceManager: React.FC = () => {
 
     clearForm();
   };
-
 
   const handleUpdate = async (id: string) => {
     await updateInvoice(id, formData);
@@ -227,6 +180,61 @@ const InvoiceManager: React.FC = () => {
       console.error('Erro ao deslogar:', error);
     }
   };
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        setLoading(true); 
+        const data = await getInvoices();
+        setInvoices(data);
+
+        const paidState: { [key: string]: boolean } = {};
+        data.forEach((inv: any) => {
+          paidState[inv.id] = inv.isPaid || false;
+        });
+        setPaidInvoices(paidState);
+      } catch (err) {
+        console.error("Erro ao buscar faturas:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInvoices();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/login");
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    const fetchCompanyName = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const companyName = userDoc.data().companyName;
+          setFormData((prevData) => ({ ...prevData, companyName }));
+        }
+      }
+    };
+    fetchCompanyName();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-100">
+        <Suspense fallback={<div></div>}>
+          <Loader text="Carregando suas faturas..." size={80} />
+        </Suspense>
+      </div>
+    );
+  }
 
   return (
     <div className="invoice-container">
@@ -312,10 +320,8 @@ const InvoiceManager: React.FC = () => {
       </div>
 
       <div className="invoice-section">
-        <h3 className="invoice-section-title">Resumo</h3>
-        <p className="invoice-summary">Subtotal: <span className="invoice-summary-bold">{calculateSubtotal()} MZN</span></p>
-        <p className="invoice-summary">Impostos (17%): <span className="invoice-summary-bold">{calculateTax(calculateSubtotal())} MZN</span></p>
-        <p className="invoice-summary">Total: <span className="invoice-summary-bold">{calculateTotal(calculateSubtotal(), calculateTax(calculateSubtotal()))} MZN</span></p>
+        <h3 className="invoice-section-title">Total</h3>
+        <p className="invoice-summary"><span className="invoice-summary-bold">{calculateTotal(calculateSubtotal())} MZN</span></p>
       </div>
 
       <div className="invoice-section">
@@ -342,7 +348,7 @@ const InvoiceManager: React.FC = () => {
           <li className="invoice-summary mb-4" key={invoice.id}>
             {paidInvoices[invoice.id] ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name).join(', ')} - {invoice.total + "MZN"}
             <button className="invoice-button ml-2 lg:mr-2" onClick={() => handleDelete(invoice.id)}>Excluir</button>
-            <button className="invoice-button hidden lg:inline-block" onClick={() => { setPreviewData(invoice)}}>Ver</button>
+            <button className="invoice-button" onClick={() => { setPreviewData(invoice)}}>Ver</button>
             <button className="invoice-button ml-2" onClick={async () =>{
               const newPaidStatus = !paidInvoices[invoice.id];
               setPaidInvoices(prev => ({
