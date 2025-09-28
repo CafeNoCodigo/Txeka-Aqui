@@ -27,3 +27,5 @@ tokenforgithub.txt
 Guideline.txt
 
 .env
+.vercel
+.env.local
