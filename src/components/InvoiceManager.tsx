@@ -7,6 +7,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { QRCodeCanvas } from "qrcode.react";
 import jsPDF from "jspdf";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import autoTable from "jspdf-autotable";
+
 const Loader = lazy(() => import("../components/Loader"));
 
 const InvoiceManager: React.FC = () => {
@@ -29,43 +31,70 @@ const InvoiceManager: React.FC = () => {
   const generateInvoicePDF = (invoice: any) => {
     const doc = new jsPDF();
 
-    doc.setFontSize(18);
-    doc.text(`Código da Factura: ${invoice.id}`, 20, 20);
+    const addHeader = () => {
+      doc.setFontSize(16);
+      doc.text(`Código da Fatura: #${invoice.id}`, 20, 20);
+
+      doc.setFontSize(10);
+      doc.text(`Cliente: ${invoice.employeeName || "-"}`, 20, 30);
+      doc.text(`Atendente: ${invoice.employeeRole || "-"}`, 20, 36);
+      doc.text(`Forma de Pagamento: ${invoice.paymentMethod || "-"}`, 20, 42);
+
+      doc.line(20, 46, 190, 46);
+    };
+
+    addHeader();
+
+    const tableData = (invoice.products || []).map((p: any, i: number) => [
+      i + 1,
+      doc.splitTextToSize(p.name ?? "-", 60),
+      p.quantity ?? 0,
+      `${(p.price ?? 0).toFixed(2)} MZN`,
+      `${((p.quantity ?? 0) * (p.price ?? 0)).toFixed(2)} MZN`,
+    ]);
+
+    autoTable(doc, {
+      startY: 55,
+      margin: { top: 55 },
+      head: [["#", "Produto", "Qtd", "Preço", "Total"]],
+      body: tableData,
+      theme: "striped",
+      styles: { fontSize: 10, halign: "center" },
+      headStyles: { fillColor: [39, 174, 96], textColor: [255, 255, 255] },
+      columnStyles: {
+        0: { halign: "center" },
+        1: { halign: "left" },
+        2: { halign: "center" },
+        3: { halign: "right" },
+        4: { halign: "right" },
+      },
+      didDrawPage: () => {
+        addHeader();
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(
+          `Página ${pageCount}`,
+          doc.internal.pageSize.getWidth() - 40,
+          doc.internal.pageSize.getHeight() - 10
+        );
+      },
+    });
+
+    let finalY = (doc as any).lastAutoTable.finalY || 55;
 
     doc.setFontSize(12);
-    doc.text(`Cliente: ${invoice.employeeName}`, 20, 40);
-    doc.text(`Atendente: ${invoice.employeeRole}`, 20, 50);
-    doc.text(`Forma de Pagamento: ${invoice.paymentMethod}`, 20, 60);
+    doc.text(`Subtotal: ${(invoice.subtotal ?? 0).toFixed(2)} MZN`, 140, finalY + 10, { align: "right" });
+    doc.text(`Impostos: ${(invoice.tax ?? 0).toFixed(2)} MZN`, 140, finalY + 20, { align: "right" });
+    doc.text(`Total: ${(invoice.total ?? 0).toFixed(2)} MZN`, 140, finalY + 30, { align: "right" });
 
-    let y = 80;
-    invoice.products.forEach((p: any, i: number) => {
-      doc.text(`${i + 1}. ${p.name} - Qtd: ${p.quantity} - Preço: ${p.price} MZN`, 20, y);
-      y += 10;
-    });
-
-    doc.text(`Subtotal: ${invoice.subtotal} MZN`, 20, y + 10);
-    doc.text(`Impostos: ${invoice.tax} MZN`, 20, y + 20);
-    doc.text(`Total: ${invoice.total} MZN`, 20, y + 30);
-
-    // Baixa o PDF localmente
-    doc.save(`Fatura-${invoice.employeeName}.pdf`);
-  };
-
-  const generateQRCode = (invoice: any) => {
-    const qrData = JSON.stringify({
-      id: invoice.id,
-      cliente: invoice.employeeName,
-      total: invoice.total,
-      pagamento: invoice.paymentMethod,
-    });
-    setQrCode(qrData); // só mostra no preview
+    doc.save(`Fatura-${invoice.employeeName || "Cliente"}.pdf`);
   };
 
   const uploadInvoicePDF = async (invoice: any, pdfBlob: Blob) => {
     const pdfRef = ref(storage, `faturas/${invoice.id}.pdf`);
     await uploadBytes(pdfRef, pdfBlob);
     const url = await getDownloadURL(pdfRef);
-    return url; // retorna link público do PDF
+    return url;
   };
 
   // logs para depuração
@@ -346,7 +375,7 @@ const InvoiceManager: React.FC = () => {
       <ul>
         {invoices.map(invoice => (
           <li className="invoice-summary mb-4" key={invoice.id}>
-            {paidInvoices[invoice.id] ? "✔ " : "❌ " + invoice.companyName} - {invoice.products.map((p: any) => p.name).join(', ')} - {invoice.total + "MZN"}
+            {paidInvoices[invoice.id] ? "✔ " : "❌ " + invoice.companyName} - {invoice.employeeName} - {invoice.id} - {invoice.total + "MZN"}
             <button className="invoice-button ml-2 lg:mr-2" onClick={() => handleDelete(invoice.id)}>Excluir</button>
             <button className="invoice-button" onClick={() => { setPreviewData(invoice)}}>Ver</button>
             <button className="invoice-button ml-2" onClick={async () =>{
