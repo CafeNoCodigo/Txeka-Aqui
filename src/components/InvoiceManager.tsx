@@ -1,12 +1,10 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import { createInvoice, updateInvoice, deleteInvoice, getInvoices } from "../services/invoiceService";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth, db, storage } from "../firebaseConfig";
+import { auth, db, } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
-import { QRCodeCanvas } from "qrcode.react";
 import jsPDF from "jspdf";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import autoTable from "jspdf-autotable";
 
 const Loader = lazy(() => import("../components/Loader"));
@@ -20,10 +18,10 @@ const InvoiceManager: React.FC = () => {
     employeeRole: "",
     paymentMethod: "",
   });
-  const [logo, setLogo] = useState<File | null>(null);
+  //const [logo, setLogo] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any | null>(null);
   const [products, setProducts] = useState<{ name: string; quantity: number; price: number }[]>([]);
-  const [qrCodeData, setQrCode] = useState<any | null>(null);
+  //const [qrCodeData, setQrCode] = useState<any | null>(null);
   const [paidInvoices, setPaidInvoices] = useState<{ [key: string]: boolean }>({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -90,12 +88,12 @@ const InvoiceManager: React.FC = () => {
     doc.save(`Fatura-${invoice.employeeName || "Cliente"}.pdf`);
   };
 
-  const uploadInvoicePDF = async (invoice: any, pdfBlob: Blob) => {
-    const pdfRef = ref(storage, `faturas/${invoice.id}.pdf`);
-    await uploadBytes(pdfRef, pdfBlob);
-    const url = await getDownloadURL(pdfRef);
-    return url;
-  };
+  //const uploadInvoicePDF = async (invoice: any, pdfBlob: Blob) => {
+  //  const pdfRef = ref(storage, `faturas/${invoice.id}.pdf`);
+  //  await uploadBytes(pdfRef, pdfBlob);
+  //  const url = await getDownloadURL(pdfRef);
+  //  return url;
+  //};
 
   // logs para depuração
   //useEffect(() => {
@@ -107,18 +105,18 @@ const InvoiceManager: React.FC = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setLogo(e.target.files[0]);
-    }
-  };
+  //const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //  if (e.target.files && e.target.files[0]) {
+  //    setLogo(e.target.files[0]);
+  //  }
+  //};
 
-  const handlePreview = () => {
-    setPreviewData({
-      ...formData,
-      logo: logo ? URL.createObjectURL(logo) : null,
-    });
-  };
+  //const handlePreview = () => {
+  //  setPreviewData({
+  //    ...formData,
+  //    logo: logo ? URL.createObjectURL(logo) : null,
+  //  });
+  //};
 
   const handleAddProduct = () => {
     setProducts([...products, { name: '', quantity: 0, price: 0 }]);
@@ -152,7 +150,7 @@ const InvoiceManager: React.FC = () => {
     setPreviewData(null);
     setProducts([]);
 
-    // Limpar os campos do formulário visualmente
+    // Limpar os campos do formulário apenas visualmente sem mexer com nada
     const inputs = document.querySelectorAll<
       HTMLInputElement | HTMLSelectElement
     >(
@@ -192,10 +190,10 @@ const InvoiceManager: React.FC = () => {
     clearForm();
   };
 
-  const handleUpdate = async (id: string) => {
-    await updateInvoice(id, formData);
-    setInvoices(invoices.map(inv => (inv.id === id ? { id, ...formData } : inv)));
-  };
+  //const handleUpdate = async (id: string) => {
+  //  await updateInvoice(id, formData);
+  //  setInvoices(invoices.map(inv => (inv.id === id ? { id, ...formData } : inv)));
+  //};
 
   const handleDelete = async (id: string) => {
     await deleteInvoice(id);
@@ -377,7 +375,7 @@ const InvoiceManager: React.FC = () => {
           <li className="invoice-summary mb-4" key={invoice.id}>
             {paidInvoices[invoice.id] ? "✔ " : "❌ " + invoice.companyName} - {invoice.employeeName} - {invoice.id} - {invoice.total + "MZN"}
             <button className="invoice-button ml-2 lg:mr-2" onClick={() => handleDelete(invoice.id)}>Excluir</button>
-            <button className="invoice-button" onClick={() => { setPreviewData(invoice)}}>Ver</button>
+            <button className="invoice-button ml-2" onClick={() => { setPreviewData(invoice)}}>Ver</button>
             <button className="invoice-button ml-2" onClick={async () =>{
               const newPaidStatus = !paidInvoices[invoice.id];
               setPaidInvoices(prev => ({
@@ -394,16 +392,6 @@ const InvoiceManager: React.FC = () => {
       </ul>
       {previewData && (
         <div className="invoice-preview">
-          {qrCodeData && (
-            <div>
-              <h3>#{qrCodeData.id}</h3>
-              <QRCodeCanvas
-                value={qrCodeData}
-                size={180}
-              />
-              <p className="mt-2">Escaneie para baixar a fatura</p>
-            </div>
-          )}
           <h2>{previewData.companyName}</h2>
           <p>Nome do Cliente: {previewData.employeeName}</p>
           <p>Nome do Atendente: {previewData.employeeRole}</p>

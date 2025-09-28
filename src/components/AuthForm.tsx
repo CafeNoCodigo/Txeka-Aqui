@@ -22,7 +22,6 @@ const AuthForm: React.FC = () => {
   const [isSendingCode, setIsSendingCode] = useState(false);
 
   useEffect(() => {
-    // Simula carregamento inicial
     const timer = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -35,7 +34,7 @@ const AuthForm: React.FC = () => {
     setGeneratedCode(code);
 
     try {
-      const response = await fetch('http://localhost:3001/send-email', {
+      const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code }),
@@ -62,6 +61,7 @@ const AuthForm: React.FC = () => {
 
     try {
       if (isRegistering) {
+        // Validações locais
         if (password !== confirmPassword) {
           setError('As senhas não coincidem.');
           return;
@@ -75,17 +75,16 @@ const AuthForm: React.FC = () => {
           return;
         }
 
+        // Cria usuário no Firebase
         await createUserWithEmailAndPassword(auth, email, password);
 
         const user = auth.currentUser;
         if (user) {
           const userRef = doc(firestore, 'users', user.uid);
-          await setDoc(userRef, {
-            companyName,
-            email,
-          });
+          await setDoc(userRef, { companyName, email });
         }
       } else {
+        // Login
         const isEmail = email.includes('@');
         if (isEmail) {
           await signInWithEmailAndPassword(auth, email, password);
@@ -106,12 +105,25 @@ const AuthForm: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Erro Firebase:", err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Email ou senha incorretos.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('A sua senha deve ter pelo menos 6 caracteres.');
-      } else {
-        setError('Ocorreu um erro. Tente novamente.');
+
+      // Tratamento detalhado de erros Firebase
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          setError('Este e-mail já está em uso.');
+          break;
+        case 'auth/invalid-email':
+          setError('O e-mail informado é inválido.');
+          break;
+        case 'auth/weak-password':
+          setError('A senha deve ter pelo menos 6 caracteres.');
+          break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          setError('Email ou senha incorretos.');
+          break;
+        default:
+          setError('Ocorreu um erro. Tente novamente.');
+          break;
       }
     }
   };
