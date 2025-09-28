@@ -32,7 +32,7 @@ const InvoiceManager: React.FC = () => {
     const addHeader = () => {
       doc.setFontSize(16);
       doc.text(`${invoice.companyName}`, 20, 20);
-      doc.text(`Código da Fatura: #${invoice.id}`, 20, 20);
+      doc.text(`Código da Fatura: #${invoice.id}`, 20, 28);
 
       doc.setFontSize(10);
       doc.text(`Cliente: ${invoice.employeeName || "-"}`, 20, 30);
