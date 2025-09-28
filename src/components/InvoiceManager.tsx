@@ -35,11 +35,11 @@ const InvoiceManager: React.FC = () => {
       doc.text(`Código da Fatura: #${invoice.id}`, 20, 28);
 
       doc.setFontSize(10);
-      doc.text(`Cliente: ${invoice.employeeName || "-"}`, 20, 30);
-      doc.text(`Atendente: ${invoice.employeeRole || "-"}`, 20, 36);
-      doc.text(`Forma de Pagamento: ${invoice.paymentMethod || "-"}`, 20, 42);
+      doc.text(`Cliente: ${invoice.employeeName || "-"}`, 20, 36);
+      doc.text(`Atendente: ${invoice.employeeRole || "-"}`, 20, 42);
+      doc.text(`Forma de Pagamento: ${invoice.paymentMethod || "-"}`, 20, 48);
 
-      doc.line(20, 46, 190, 46);
+      doc.line(20, 52, 190, 52);
     };
 
     addHeader();
