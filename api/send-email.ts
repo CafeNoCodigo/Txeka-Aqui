@@ -30,4 +30,4 @@ app.post('/send-email', async (req: Request, res: Response) => {
   }
 });
 
-export const handler = serverless(app);
+export default serverless(app);
