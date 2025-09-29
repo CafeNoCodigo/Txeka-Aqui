@@ -141,7 +141,10 @@ const AuthForm: React.FC = () => {
   }
 
   return (
-    <div className="auth-form-container">
+    <div className="auth-form-container flex-col">
+      <div className='bg-red-500 p-4 mb-5 rounded-xl z-1'>
+        <p className='text-white text-shadow-lg'>ESTA A USAR O PERIODO GRATUITO DO SISTEMA</p>
+      </div>
       <Canvas 
         camera={{ position: [0, 0, 10] }}
         style={{ position: 'absolute'}}>
