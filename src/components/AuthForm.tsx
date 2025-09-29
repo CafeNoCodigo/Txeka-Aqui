@@ -4,6 +4,8 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'fire
 import { getFirestore, doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import './AuthForm.css';
+import Particles from '../components/Particles'
+import { Canvas } from "@react-three/fiber";
 
 const Loader = lazy(() => import("../components/Loader"));
 
@@ -140,6 +142,11 @@ const AuthForm: React.FC = () => {
 
   return (
     <div className="auth-form-container">
+      <Canvas 
+        camera={{ position: [0, 0, 10] }}
+        style={{ position: 'absolute'}}>
+        <Particles count={300} />
+      </Canvas>
       <AnimatePresence mode="wait">
         <motion.form
           key={isRegistering ? "register" : "login"}
@@ -150,7 +157,7 @@ const AuthForm: React.FC = () => {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          <h2 className='invoice-header'>{isRegistering ? 'Registrar' : 'Entrar'}</h2>
+          <h2 className='invoice-header'>{isRegistering ? 'Sign Up' : 'Login'}</h2>
           {error && <p className="error-message">{error}</p>}
 
           <input
