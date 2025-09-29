@@ -42,7 +42,7 @@ const AuthForm: React.FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        alert('E-mail de verificação enviado com sucesso! Verifique sua caixa de entrada.');
+        alert('Verifique sua caixa de entrada ou spam.');
       } else {
         setError('Erro ao enviar e-mail de verificação. Tente novamente.');
       }
