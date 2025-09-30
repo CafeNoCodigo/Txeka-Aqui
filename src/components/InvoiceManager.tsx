@@ -265,17 +265,17 @@ const InvoiceManager: React.FC = () => {
   }
 
   return (
-    <div className="invoice-container">
+    <div className="invoice-container back">
       <h1 className="invoice-header">Gerenciar Faturas</h1>
       <div className="invoice-section">
         <input className="invoice-input mb-4" name="employeeName" placeholder="Nome do Cliente" onChange={handleInputChange} />
         <input className="invoice-input md:ml-4" name="employeeRole" placeholder="Nome do atendente" onChange={handleInputChange} />
-        <select className='border border-gray-300 md:ml-4 mt-4 p-2 rounded-lg' name="paymentMethod" onChange={handleInputChange}>
-          <option value="">Forma de Pagamento</option>
-          <option value="M-Pesa">M-Pesa</option>
-          <option value="E-Mola">E-Mola</option>
-          <option value="Banco">Banco</option>
-          <option value="Numerário">Numerário</option>
+        <select className='border border-white md:ml-4 mt-4 p-2 rounded-lg text-white bg-black' name="paymentMethod" onChange={handleInputChange}>
+          <option value="" className="text-gray-100">Forma de Pagamento</option>
+          <option value="M-Pesa" className="text-white">M-Pesa</option>
+          <option value="E-Mola" className="text-white">E-Mola</option>
+          <option value="Banco" className="text-white">Banco</option>
+          <option value="Numerário" className="text-white">Numerário</option>
         </select>
         <button
           className='invoice-button mt-4 md:ml-4'
@@ -373,7 +373,7 @@ const InvoiceManager: React.FC = () => {
 
       <ul>
         {invoices.map(invoice => (
-          <li className="invoice-summary mb-4" key={invoice.id}>
+          <li className="invoice-summary mb-4 backdrop-blur-2xl rounded-lg p-4" key={invoice.id}>
             {paidInvoices[invoice.id] ? "✔ " : "❌ " + invoice.companyName} - {invoice.employeeName} - {invoice.id} - {invoice.total + "MZN"}
             <button className="invoice-button ml-2 lg:mr-2" onClick={() => handleDelete(invoice.id)}>Excluir</button>
             <button className="invoice-button ml-2" onClick={() => { setPreviewData(invoice)}}>Ver</button>

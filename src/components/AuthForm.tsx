@@ -108,7 +108,7 @@ const AuthForm: React.FC = () => {
     } catch (err: any) {
       console.error("Erro Firebase:", err);
 
-      // Tratamento detalhado de erros Firebase
+      // Tratamento detalhado de erros no Firebase
       switch (err.code) {
         case 'auth/email-already-in-use':
           setError('Este e-mail já está em uso.');

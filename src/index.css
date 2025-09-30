@@ -1,31 +1,46 @@
 @import "tailwindcss";
+.back {
+  background-image: url('/bg2.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
 /* Custom styles for InvoiceManager */
 .invoice-container {
-  @apply p-6 bg-gray-100 min-h-screen;
+  @apply p-6 bg-white min-h-screen z-9999;
 }
 .invoice-header {
-  @apply text-3xl font-bold text-center text-[#2e7d32] mb-6;
+  @apply text-3xl font-bold text-center text-[#58da5f] mb-6;
 }
 .invoice-section {
-  @apply bg-amber-50 shadow-md rounded-lg p-6 mb-6;
+  @apply bg-transparent shadow-md rounded-lg p-6 mb-6 backdrop-blur-2xl;
 }
 .invoice-section-title {
-  @apply text-xl font-semibold mb-4;
+  @apply text-xl font-semibold mb-4 text-white;
 }
 .invoice-input {
-  @apply border border-gray-300 rounded-lg p-2;
+  @apply border border-white rounded-lg p-2 text-white;
 }
 .invoice-button {
-  @apply bg-[#2e7d32] text-white px-4 py-2 rounded-lg hover:bg-[#27632a] cursor-pointer md:hover:scale-105 transition-transform;
+  @apply bg-[#58da5f] text-black px-4 py-2 rounded-lg hover:bg-[#3c9c41] cursor-pointer md:hover:scale-105 transition-transform;
 }
 .invoice-button-remove {
   @apply bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600;
 }
 .invoice-summary {
-  @apply text-gray-700;
+  @apply text-white;
 }
 .invoice-summary-bold {
   @apply font-bold;
 }
+.invoice-preview {
+  @apply text-white backdrop-blur-2xl rounded-lg;
+}
 /* Custom styles for InvoiceManager */
+
+/*Footer style*/
+.media-logo {
+  @apply w-7 h-7 cursor-pointer;
+}
+/*Footer Style*/
