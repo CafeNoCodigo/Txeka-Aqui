@@ -41,7 +41,7 @@
 
 /*Footer style*/
 .media-logo {
-  @apply w-7 h-7 cursor-pointer;
+  @apply w-7 h-7 cursor-pointer hover:scale-110 transition-transform;
 }
 /*Footer Style*/
 
