@@ -18,10 +18,8 @@ const InvoiceManager: React.FC = () => {
     employeeRole: "",
     paymentMethod: "",
   });
-  //const [logo, setLogo] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any | null>(null);
   const [products, setProducts] = useState<{ name: string; quantity: number; price: number }[]>([]);
-  //const [qrCodeData, setQrCode] = useState<any | null>(null);
   const [paidInvoices, setPaidInvoices] = useState<{ [key: string]: boolean }>({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -89,35 +87,10 @@ const InvoiceManager: React.FC = () => {
     doc.save(`Fatura-${invoice.employeeName || "Cliente"}.pdf`);
   };
 
-  //const uploadInvoicePDF = async (invoice: any, pdfBlob: Blob) => {
-  //  const pdfRef = ref(storage, `faturas/${invoice.id}.pdf`);
-  //  await uploadBytes(pdfRef, pdfBlob);
-  //  const url = await getDownloadURL(pdfRef);
-  //  return url;
-  //};
-
-  // logs para depuração
-  //useEffect(() => {
-  //  console.log('Estado inicial de products:', products);
-  //}, [products]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  //const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //  if (e.target.files && e.target.files[0]) {
-  //    setLogo(e.target.files[0]);
-  //  }
-  //};
-
-  //const handlePreview = () => {
-  //  setPreviewData({
-  //    ...formData,
-  //    logo: logo ? URL.createObjectURL(logo) : null,
-  //  });
-  //};
 
   const handleAddProduct = () => {
     setProducts([...products, { name: '', quantity: 0, price: 0 }]);
@@ -190,11 +163,6 @@ const InvoiceManager: React.FC = () => {
 
     clearForm();
   };
-
-  //const handleUpdate = async (id: string) => {
-  //  await updateInvoice(id, formData);
-  //  setInvoices(invoices.map(inv => (inv.id === id ? { id, ...formData } : inv)));
-  //};
 
   const handleDelete = async (id: string) => {
     await deleteInvoice(id);
