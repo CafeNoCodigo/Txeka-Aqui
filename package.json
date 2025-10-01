@@ -20,6 +20,7 @@
     "framer-motion": "^12.23.22",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
+    "lucide-react": "^0.544.0",
     "nodemailer": "^7.0.6",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",

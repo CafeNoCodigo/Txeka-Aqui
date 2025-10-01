@@ -11,7 +11,7 @@
   @apply p-6 bg-white min-h-screen z-9999;
 }
 .invoice-header {
-  @apply text-3xl font-bold text-center text-[#58da5f] mb-6;
+  @apply text-3xl font-bold text-center text-[#58da5f] mb-6 mt-14;
 }
 .invoice-section {
   @apply bg-transparent shadow-md rounded-lg p-6 mb-6 backdrop-blur-2xl;
@@ -44,3 +44,15 @@
   @apply w-7 h-7 cursor-pointer;
 }
 /*Footer Style*/
+
+/*Hero Style*/
+.hero {
+  @apply fixed top-0 left-0 w-full z-50 bg-gray-900 text-white p-4 shadow-md backdrop-blur-md flex items-center justify-between;
+}
+.link {
+  @apply underline hover:text-gray-300 transition-colors;
+}
+.hero-mobile{
+  @apply fixed top-0 right-0 h-full w-64 bg-gray-800 text-white shadow-lg flex flex-col p-6 space-y-6 md:hidden transition-transform;
+}
+/*Hero Style*/

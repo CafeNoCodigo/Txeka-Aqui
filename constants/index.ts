@@ -21,3 +21,10 @@ export const socialImgs: SocialImg[] = [
     url: "https://wa.me/258847455300/",
   }
 ];
+
+export const logo ={
+    imgPath: "/invo.png",
+    alt: 'Logo',
+    href: 'invoiceupmz.vercel.app/',
+    href2: 'invoiceupmz.vercel.app/invoices/'
+  } 
