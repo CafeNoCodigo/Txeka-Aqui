@@ -46,7 +46,7 @@ const UserStats = () => {
   if (!currentUser) return <p className="mt-20 text-center">Faça login para acessar o dashboard</p>;
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-black min-h-screen mt-20">
       <h1 className="text-2xl font-bold mb-6 text-center">Dashboard de Admin</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow text-center">
