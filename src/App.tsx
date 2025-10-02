@@ -6,6 +6,7 @@ import AuthForm from "./components/AuthForm";
 import InvoiceManager from "./components/InvoiceManager";
 import type { User } from "firebase/auth";
 import { Suspense, lazy } from "react";
+import UserStats from "./components/UserStats";
 
 const Loader = lazy(() => import("./components/Loader"));
 
@@ -40,6 +41,7 @@ function App() {
             path="/login"
             element={!user ? <AuthForm /> : <Navigate to="/invoices" />}
           />
+          <Route path="/admin/stats" element={<UserStats />} />
           <Route
             path="/invoices"
             element={user ? <InvoiceManager /> : <Navigate to="/login" />}
