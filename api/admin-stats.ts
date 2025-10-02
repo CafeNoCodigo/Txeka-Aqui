@@ -1,20 +1,34 @@
-// api/admin-stats.ts
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { authAdmin, firestoreAdmin } from "../backend/admin";
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import admin from 'firebase-admin';
+
+// Inicializa o Firebase Admin apenas uma vez
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+      privateKey: process.env.VITE_FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.VITE_FIREBASE_CLIENT_EMAIL,
+    }),
+    databaseURL: "https://txeka-aqui-ae4f5-default-rtdb.firebaseio.com/",
+  });
+}
+
+const authAdmin = admin.auth();
+const firestoreAdmin = admin.firestore();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    // 1️⃣ Contar usuários
-    const listUsers = await authAdmin.listUsers();
+    // 🔹 Contar usuários
+    const listUsers = await authAdmin.listUsers(); // 1000 por vez
     const totalUsers = listUsers.users.length;
 
-    // 2️⃣ Contar invoices no Firestore
+    // 🔹 Contar invoices
     const invoicesSnapshot = await firestoreAdmin.collection("invoices").get();
     const totalInvoices = invoicesSnapshot.size;
 
-    // 3️⃣ Somar receita
+    // 🔹 Somar receita
     let totalRevenue = 0;
-    invoicesSnapshot.forEach((doc) => {
+    invoicesSnapshot.forEach(doc => {
       const data = doc.data();
       totalRevenue += data.total || 0;
     });
