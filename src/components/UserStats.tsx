@@ -20,7 +20,7 @@ const UserStats = () => {
       if (user) {
         try {
           const token = await user.getIdToken();
-          const res = await fetch("http://localhost:3001/admin/stats", {
+          const res = await fetch("/api/admin-stats", {
             headers: { Authorization: `Bearer ${token}` },
           });
 
