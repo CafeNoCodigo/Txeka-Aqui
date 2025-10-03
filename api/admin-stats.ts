@@ -17,7 +17,7 @@ const authAdmin = admin.auth();
 const firestoreAdmin = admin.firestore();
 
 // 🔒 UID permitido
-const ALLOWED_UID = process.env.VITE_FIREBASE_UID;
+const ALLOWED_UID = "dpMJJTdcIMNvAyFPxgDMWLnVdrm1";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
