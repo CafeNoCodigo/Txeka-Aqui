@@ -20,5 +20,6 @@ const db = getFirestore(app);
 const functions = getFunctions(app);
 const storage = getStorage(app);
 const rtdb = getDatabase(app);
+const firestore = getFirestore(app);
 
-export { auth, db, functions, storage, rtdb };
+export { auth, db, functions, storage, rtdb, firestore };

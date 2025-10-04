@@ -34,6 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 🔹 Checar UID autorizado
     if (decodedToken.uid !== ALLOWED_UID) {
+      console.log("Contacte um administrador!");
       return res.status(403).json({ error: "Acesso negado" });
     }
 
