@@ -18,7 +18,7 @@ export const socialImgs: SocialImg[] = [
   {
     name: "whatsapp",
     imgPath: "/social-media/whatsapp-30.svg",
-    url: "https://wa.me/258847455300/",
+    url: "https://wa.me/258835270473/",
   }
 ];
 
