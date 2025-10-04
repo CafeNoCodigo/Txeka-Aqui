@@ -19,10 +19,15 @@ Permite cadastro de usuários (empresas), registro de vendas, geração de fatur
 ## ✨ Funcionalidades
 
 ✔️ Cadastro de usuário com nome da empresa e email
+
 ✔️ Registro de vendas (quantidade, nome, preço, atendente e cliente)
+
 ✔️ Emissão de fatura em **PDF**
+
 ✔️ Download direto da fatura
+
 ✔️ Visualização e exclusão de faturas
+
 ✔️ Marcar faturas como **pagas ou não pagas**
 
 ---
@@ -44,7 +49,7 @@ Permite cadastro de usuários (empresas), registro de vendas, geração de fatur
  ┃ ┣ 📂 components     # Componentes reutilizáveis (React + TSX)
  ┃ ┣ 📂 sections       # Páginas principais do sistema
  ┃ ┗ 📂 services       # Funções auxiliares
- ┣ 📂 types             # configuracos para o typescript reconhecer dependencias 
+ ┣ 📂 types            # configuracos para o typescript reconhecer dependencias 
  ┣ 📜 package.json
  ┣ 📜 sever.cjs 
  ┣ 📜 tsconfig.json
@@ -119,4 +124,4 @@ Este projeto é distribuído sob a licença **MIT**.
 
 ---
 
-Feito com 💚 por [Fabiao Chirindza Mainato]
+Feito com 💚 por Fabiao Chirindza Mainato
