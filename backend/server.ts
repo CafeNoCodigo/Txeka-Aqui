@@ -1,4 +1,4 @@
-import express from "express";
+ import express from "express";
 import adminRoutes from "./routes/admin.ts";
 
 const app = express();

@@ -10,5 +10,5 @@ async function makeAdmin(uid: string) {
 }
 
 // Substitua pelo UID do usuário que quer tornar admin
-const UID_DO_USUARIO = "dpMJJTdcIMNvAyFPxgDMWLnVdrm1";
+const UID_DO_USUARIO = String(process.env.VITE_FIREBASE_UID);
 makeAdmin(UID_DO_USUARIO);

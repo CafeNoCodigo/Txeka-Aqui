@@ -16,10 +16,30 @@ if (!admin.apps.length) {
 const authAdmin = admin.auth();
 const firestoreAdmin = admin.firestore();
 
+// 🔒 UID permitido
+const ALLOWED_UID = "dpMJJTdcIMNvAyFPxgDMWLnVdrm1";
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    // 🔹 Pegar token do header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Token não fornecido" });
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+
+    // 🔹 Verificar token no Firebase
+    const decodedToken = await authAdmin.verifyIdToken(idToken);
+
+    // 🔹 Checar UID autorizado
+    if (decodedToken.uid !== ALLOWED_UID) {
+      console.log("Contacte um administrador!");
+      return res.status(403).json({ error: "Acesso negado" });
+    }
+
     // 🔹 Contar usuários
-    const listUsers = await authAdmin.listUsers(); // 1000 por vez
+    const listUsers = await authAdmin.listUsers(); // retorna até 1000
     const totalUsers = listUsers.users.length;
 
     // 🔹 Contar invoices

@@ -11,6 +11,7 @@ const Hero = () => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
+        setIsOpen(false);
         try {
         await signOut(auth);
         navigate("/login");
@@ -24,9 +25,9 @@ const Hero = () => {
             {/* Logo */}
             <Link to="/">
                 <img
-                className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                src={logo.imgPath}
-                alt={logo.alt}
+                    className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
+                    src={logo.imgPath}
+                    alt={logo.alt}
                 />
             </Link>
 
@@ -35,26 +36,28 @@ const Hero = () => {
                 <ul className="flex gap-8">
                     <li className="hover:scale-110 transition-transform">
                         <Link
-                        className="link"
-                        to="/invoices"
+                            className="link"
+                            to="/invoices"
                         >
-                        Manage Invoice
+                            Manage Invoice
                         </Link>
                     </li>
                     <li className="hover:scale-110 transition-transform">
                         <Link
-                        className="link"
-                        to="/"
+                            className="link"
+                            to="/account/settings"
                         >
                         Account
                         </Link>
                     </li>
                     <li className="hover:scale-110 transition-transform">
                         <button
-                            className="link cursor-pointer"
-                            onClick={handleLogout}
+                            className="hover:underline cursor-pointer"
+                            onClick={() =>{
+                                handleLogout();
+                            }}
                         >
-                        Log out
+                            Log out
                         </button>
                     </li>
                 </ul>
@@ -86,14 +89,17 @@ const Hero = () => {
                     </Link>
                     <Link
                         className="link"
-                        to="/"
+                        to="/account/settings"
                         onClick={() => setIsOpen(false)}
                     >
                         Account
                     </Link>
                     <button
                         className="link cursor-pointer mr-42"
-                        onClick={handleLogout}
+                        onClick={()=>{
+                            setIsOpen(false);
+                            handleLogout();
+                        }}
                     >
                         Log out
                     </button>

@@ -47,10 +47,10 @@
 
 /*Hero Style*/
 .hero {
-  @apply fixed top-0 left-0 w-full z-50 bg-transparent text-white p-4 shadow-md backdrop-blur-md flex items-center justify-between;
+  @apply fixed top-0 left-0 w-full z-50 bg-black/30 text-white p-4 shadow-md backdrop-blur-md flex items-center justify-between;
 }
 .link {
-  @apply hover:underline hover:text-gray-300 transition-colors backdrop-blur-md;
+  @apply hover:underline hover:bg-transparent transition-colors;
 }
 .hero-mobile{
   @apply relative top-0 right-[-20px] h-full w-64 bg-transparent backdrop-blur-md text-white shadow-lg flex flex-col p-4 space-y-6 md:hidden transition-transform;
